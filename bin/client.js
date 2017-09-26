@@ -19,11 +19,11 @@ require('yargs')
   .command('list', 'list all deployed jobs', () => {}, argv => {
     const config = readConfig(argv.file)
     const jobList = config.jobs.map(j => {
-      return [ j.id || '', j.time || '', j.task || '' ]
+      return [ j.id || '', j.time || '', j.task || '', j.crontract || '' ]
     })
 
     console.log(table([
-      [ chalk.yellow('id'), chalk.yellow('repeat'), chalk.yellow('task') ],
+      [ chalk.yellow('id'), chalk.yellow('repeat'), chalk.yellow('task'), chalk.yellow('crontract') ],
       ...jobList
     ]))
   })
@@ -41,10 +41,11 @@ require('yargs')
     })
   }, argv => {
     const id = argv.id || uuid()
+    const crontract = argv.crontract
     console.log(table([
       [ chalk.yellow('task:'), argv.task ],
       [ chalk.yellow('repeat:'), argv.repeat ],
-      [ chalk.yellow('crontract:'), argv.crontract ],
+      [ chalk.yellow('crontract:'), crontract ],
       [ chalk.yellow('id:'), id ]
     ]))
 
@@ -64,7 +65,7 @@ require('yargs')
         }
 
         console.log(chalk.grey('storing details in ' + argv.file))
-        config.jobs.push(Object.assign({ id }, res.body))
+        config.jobs.push(Object.assign({ id, crontract }, res.body))
         writeConfig(argv.file, config)
 
         console.log(chalk.green('uploaded with id ' + id))
@@ -72,9 +73,12 @@ require('yargs')
   })
   .command('get <id>', 'get a deployed crontract job', yargs => {
   }, argv => {
+    const config = readConfig(argv.file)
+    const { job, index } = getJobById(config, argv.id)
+
     console.log(table([
-      [ chalk.yellow('id:'), argv.id ],
-      [ chalk.yellow('crontract:'), argv.crontract ]
+      [ chalk.yellow('id:'), job.id ],
+      [ chalk.yellow('crontract:'), job.crontract ]
     ]))
   })
   .command('delete <id>', 'stop a deployed crontract job', yargs => {
@@ -84,11 +88,11 @@ require('yargs')
 
     console.log(table([
       [ chalk.yellow('id:'), job.id ],
-      [ chalk.yellow('crontract:'), argv.crontract ]
+      [ chalk.yellow('crontract:'), job.crontract ]
     ]))
 
     agent
-      .delete(argv.crontract + '/jobs/' + job.id)
+      .delete(job.crontract + '/jobs/' + job.id)
       .set('Authorization', 'Bearer ' + job.token)
       .end((err, res) => {
         if (err) {
