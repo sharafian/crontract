@@ -44,7 +44,7 @@ require('yargs')
     console.log(table([
       [ chalk.yellow('task:'), argv.task ],
       [ chalk.yellow('repeat:'), argv.repeat ],
-      [ chalk.yellow('crontract:'), argv.crontract ]
+      [ chalk.yellow('crontract:'), argv.crontract ],
       [ chalk.yellow('id:'), id ]
     ]))
 
@@ -125,6 +125,7 @@ function getJobById (config, id) {
 
   config.jobs.forEach((job, index) => {
     if (job.id.startsWith(id)) {
+      if (job.id === id) return { job, index }
       if (match) throw new Error('ambgiuous job id')
       match = { job, index }
     }
