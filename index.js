@@ -100,7 +100,7 @@ function runJob (id) {
     'run',
     '--rm', // remove container after task
     '-i', // don't daemonize
-    'ubuntu', // runs bash on ubuntu image
+    'node', // runs bash on node image because it has stuff installed
     '/bin/bash', '-c', jobs[id].task // run task as bash command
   ], { stdio: 'inherit', detached: false, shell: false })
 
