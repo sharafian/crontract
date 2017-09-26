@@ -27,7 +27,7 @@ require('yargs')
       ...jobList
     ]))
   })
-  .command('upload', 'start a crontract job', yargs => {
+  .command('upload [id]', 'start a crontract job', yargs => {
     yargs.option('task', {
       alias: 't',
       describe: 'task to deploy',
@@ -40,15 +40,16 @@ require('yargs')
       required: true
     })
   }, argv => {
+    const id = argv.id || uuid()
     console.log(table([
       [ chalk.yellow('task:'), argv.task ],
       [ chalk.yellow('repeat:'), argv.repeat ],
       [ chalk.yellow('crontract:'), argv.crontract ]
+      [ chalk.yellow('id:'), id ]
     ]))
 
     console.log(chalk.grey('uploading to ' + argv.crontract))
     const config = readConfig(argv.file)
-    const id = uuid()
 
     agent
       .post(argv.crontract + '/jobs/' + id)
@@ -69,24 +70,14 @@ require('yargs')
         console.log(chalk.green('uploaded with id ' + id))
       })
   })
-  .command('get', 'get a deployed crontract job', yargs => {
-    yargs.option('id', {
-      alias: 'i',
-      describe: 'identifier for crontract job',
-      required: true
-    })
+  .command('get <id>', 'get a deployed crontract job', yargs => {
   }, argv => {
     console.log(table([
       [ chalk.yellow('id:'), argv.id ],
       [ chalk.yellow('crontract:'), argv.crontract ]
     ]))
   })
-  .command('delete', 'stop a deployed crontract job', yargs => {
-    yargs.option('id', {
-      alias: 'i',
-      describe: 'identifier for crontract job',
-      required: true
-    })
+  .command('delete <id>', 'stop a deployed crontract job', yargs => {
   }, argv => {
     const config = readConfig(argv.file)
     const { job, index } = getJobById(config, argv.id)
