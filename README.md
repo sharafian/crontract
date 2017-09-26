@@ -17,4 +17,5 @@ all tasks are in the form of bash commands.
 - [ ] Dockerfile for deployment
 - [ ] Finish writing client
 - [ ] Make the client code better
-- [ ] Switch from bash commands to docker images
+- [X] Switch from bash commands to docker images
+- [ ] Add log file that can be fetched
