@@ -8,6 +8,7 @@ const cron = require('cron')
 const crypto = require('crypto')
 const childProcess = require('child_process')
 const jobs = {}
+const TASK_TIMEOUT = 10000
 
 const app = new Koa()
 const router = Router()
@@ -95,9 +96,30 @@ router.get('/jobs/:job', async (ctx) => {
 
 function runJob (id) {
   debug('called job with id %s', id)
-  childProcess.spawn('/bin/bash',
-    [ '-c', jobs[id].task ],
-    { stdio: 'inherit' })
+  const process = childProcess.spawn('docker', [
+    'run',
+    '--rm', // remove container after task
+    '-i', // don't daemonize
+    'ubuntu', // runs bash on ubuntu image
+    '/bin/bash', '-c', jobs[id].task // run task as bash command
+  ], { stdio: 'inherit', detached: false, shell: false })
+
+  let exited = false
+  process.on('exit', () => {
+    debug('process', process.pid,
+      process.killed ? 'was killed' : 'exited')
+    exited = true
+  })
+  debug('spawned process', process.pid)
+
+  setTimeout(() => {
+    if (exited) {
+      debug('process', process.pid, 'is already dead')
+    } else {
+      debug('killing process', process.pid)
+      process.kill('SIGKILL')
+    }
+  }, TASK_TIMEOUT)
 }
 
 app
