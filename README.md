@@ -19,3 +19,5 @@ all tasks are in the form of bash commands.
 - [ ] Make the client code better
 - [X] Switch from bash commands to docker images
 - [ ] Add log file that can be fetched
+- [ ] Charge for jobs
+- [ ] Allow jobs to be uploaded which make paid requests
