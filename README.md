@@ -5,6 +5,9 @@ The crontract is a codius contract which allows users to upload tasks to
 be run on an interval. It's an early WIP right now, but can be tested with:
 
 ```
+cd crontract-host
+docker build . -t crontract-host
+cd ..
 DEBUG=* node index.js
 ```
 
@@ -20,4 +23,4 @@ all tasks are in the form of bash commands.
 - [X] Switch from bash commands to docker images
 - [ ] Add log file that can be fetched
 - [ ] Charge for jobs
-- [ ] Allow jobs to be uploaded which make paid requests
+- [X] Allow jobs to be uploaded which make paid requests
