@@ -2,6 +2,10 @@ const Koa = require('koa')
 const Router = require('koa-router')
 const Parser = require('koa-bodyparser')
 
+const Ilp = require('koa-ilp')
+const plugin = require('ilp-plugin')()
+const ilp = new Ilp({ plugin })
+
 // TODO: persistence
 const debug = require('debug')('crontract')
 const cron = require('cron')
@@ -23,7 +27,7 @@ router.get('/', async (ctx) => {
   run: '...',
 }
 */
-router.post('/jobs/:job', /* TODO: make paid ,*/ async (ctx) => {
+router.post('/jobs/:job', ilp.paid({ price: 1000 }), async (ctx) => {
   const jobInfo = jobs[ctx.params.job]
   const body = ctx.request.body
 
