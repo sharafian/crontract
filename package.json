@@ -21,6 +21,7 @@
     "koa-ilp": "0.0.1",
     "koa-router": "^7.2.1",
     "superagent": "^3.6.0",
+    "superagent-ilp": "0.0.1",
     "uuid": "^3.1.0",
     "yargs": "^9.0.1"
   }

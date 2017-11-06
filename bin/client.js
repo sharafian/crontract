@@ -1,9 +1,12 @@
-const agent = require('superagent')
+const plugin = require('ilp-plugin')()
+const request = require('superagent')
+const agent = require('superagent-ilp')(request, plugin)
 const uuid = require('uuid')
 const table = require('good-table')
 const chalk = require('chalk')
 const fs = require('fs')
 const path = require('path')
+const MAX_PAYMENT = 1000000
 
 require('yargs')
   .option('crontract', {
@@ -39,7 +42,7 @@ require('yargs')
       describe: 'interval at which to perform task',
       required: true
     })
-  }, argv => {
+  }, async argv => {
     const id = argv.id || uuid()
     const crontract = argv.crontract
     console.log(table([
@@ -52,24 +55,19 @@ require('yargs')
     console.log(chalk.grey('uploading to ' + argv.crontract))
     const config = readConfig(argv.file)
 
-    agent
+    const res = await agent
       .post(argv.crontract + '/jobs/' + id)
       .send({
         task: argv.task,
         time: argv.repeat
       })
-      .end((err, res) => {
-        if (err) {
-          console.error(chalk.red(err.stack))
-          return
-        }
+      .pay(MAX_PAYMENT)
 
-        console.log(chalk.grey('storing details in ' + argv.file))
-        config.jobs.push(Object.assign({ id, crontract }, res.body))
-        writeConfig(argv.file, config)
-
-        console.log(chalk.green('uploaded with id ' + id))
-      })
+    console.log(chalk.grey('storing details in ' + argv.file))
+    config.jobs.push(Object.assign({ id, crontract }, res.body))
+    writeConfig(argv.file, config)
+    console.log(chalk.green('uploaded with id ' + id))
+    process.exit(0)
   })
   .command('get <id>', 'get a deployed crontract job', yargs => {
   }, argv => {
