@@ -6,6 +6,11 @@ const Ilp = require('koa-ilp')
 const plugin = require('ilp-plugin')()
 const ilp = new Ilp({ plugin })
 
+const request = require('superagent')
+const agent = require('superagent-ilp')(request, plugin)
+const council = require('council')({ plugin })
+const codiusHostPromise = council('org.codius')
+
 // TODO: persistence
 const debug = require('debug')('crontract')
 const cron = require('cron')
@@ -98,32 +103,22 @@ router.get('/jobs/:job', async (ctx) => {
   }
 })
 
-function runJob (id) {
+async function runJob (id) {
   debug('called job with id %s', id)
-  const process = childProcess.spawn('docker', [
-    'run',
-    '--rm', // remove container after task
-    '-i', // don't daemonize
-    'crontract-host', // runs bash on node image because it has stuff installed
-    '/bin/bash', '-c', jobs[id].task // run task as bash command
-  ], { stdio: 'inherit', detached: false, shell: false })
+  const codiusHosts = await codiusHostPromise
+  const manifest = {
+    image: 'sharafian/crontract-task',
+    port: 9999, // no port used
+    environment: {},
+    command: [ '/bin/bash', '-c', jobs[id].task ]
+  }
 
-  let exited = false
-  process.on('exit', () => {
-    debug('process', process.pid,
-      process.killed ? 'was killed' : 'exited')
-    exited = true
-  })
-  debug('spawned process', process.pid)
-
-  setTimeout(() => {
-    if (exited) {
-      debug('process', process.pid, 'is already dead')
-    } else {
-      debug('killing process', process.pid)
-      process.kill('SIGKILL')
-    }
-  }, TASK_TIMEOUT)
+  debug('calling codius')
+  await agent
+    .post(codiusHosts[0].host + '/start')
+    .send({ manifest })
+    .query({ duration: 10 })
+    .pay(1000000)
 }
 
 app
