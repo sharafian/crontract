@@ -125,13 +125,14 @@ function writeConfig (file, config) {
 function getJobById (config, id) {
   let match
 
-  config.jobs.forEach((job, index) => {
+  for (let index = 0; index < config.jobs.length; ++index) {
+    const job = config.jobs[index]
     if (job.id.startsWith(id)) {
       if (job.id === id) return { job, index }
       if (match) throw new Error('ambgiuous job id')
       match = { job, index }
     }
-  })
+  }
 
   return match
 }
