@@ -9,4 +9,4 @@ run apt-get update && apt-get install -y python
 run chmod a+rwx -R /usr
 
 user node
-run npm install -g ilp-curl
+run npm install -g ilp-curl@1.0.2
