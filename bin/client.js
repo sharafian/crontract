@@ -12,7 +12,7 @@ require('yargs')
   .option('crontract', {
     alias: 'c',
     describe: 'crontract URI to talk to',
-    default: 'localhost:5001'
+    default: process.env.CRONTRACT_URI || 'localhost:5001'
   })
   .option('file', {
     alias: 'f',
